@@ -3,37 +3,68 @@ package com.droute.userservice.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.droute.userservice.dto.RegisterUserRequestDto;
 import com.droute.userservice.entity.UserEntity;
+import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.repository.UserEntityRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UserEntityService {
-	
+
 	@Autowired
 	private UserEntityRepository userEntityRepository;
-	
-	public UserEntity registerUser(UserEntity user ) {
+
+	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException {
 		
+		var user = userEntityRepository.findByEmail(userDetails.getEmail());
+		if(user != null) {
+			throw new EntityAlreadyExistsException("User already exist with email = "+userDetails.getEmail());
+		}
+		user = new UserEntity(userDetails.getFullName(),userDetails.getEmail(), userDetails.getPassword(),userDetails.getRole(),userDetails.getContactNo());
 		return userEntityRepository.save(user);
-		
+
 	}
-	public UserEntity findUserById(Long userId ) {
-		
+
+	public UserEntity findUserById(Long userId) {
+
 		return userEntityRepository.findById(userId).orElse(null);
-		
+
 	}
-	public UserEntity updateUser(UserEntity user ) {
-		
+
+	public UserEntity updateUser(UserEntity user) {
+
 		return userEntityRepository.save(user);
-		
+
 	}
-	public void deleteUserById(Long userId ) {
+
+	public void deleteUserById(Long userId) {
 		var user = findUserById(userId);
-		
-		 userEntityRepository.delete(user);
-		
+
+		userEntityRepository.delete(user);
+
 	}
-	
-	
+
+	public boolean checkUserExist(String emailOrPhone, String password) {
+
+		UserEntity userByEmail = userEntityRepository.findByEmail(emailOrPhone);
+		UserEntity userByPhone = null;
+		if(userByEmail==null) {
+			 userByPhone = userEntityRepository.findByContactNo(emailOrPhone);
+		}
+
+		if (userByEmail == null && userByPhone == null) {
+			throw new EntityNotFoundException("User not found with mail or phone no. = " + emailOrPhone);
+		}
+		if(userByPhone != null) {
+			return userByPhone.getPassword().equals(password);
+		}
+		if (userByEmail != null) {
+			return userByEmail.getPassword().equals(password);
+		}
+		return false;
+
+	}
 
 }

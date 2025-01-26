@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.droute.userservice.dto.CommonResponseDto;
+import com.droute.userservice.dto.RegisterUserRequestDto;
 import com.droute.userservice.entity.UserEntity;
+import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.service.UserEntityService;
 
 @RestController
@@ -24,8 +26,8 @@ public class UserEntityController {
 	private UserEntityService userEntityService;
 
 	@PostMapping("/")
-	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody UserEntity user) {
-		var createdUser = userEntityService.registerUser(user);
+	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException {
+		var createdUser = userEntityService.registerUser(userDetails);
 
 		var crd = new CommonResponseDto<UserEntity>("User created Successfully.", createdUser);
 
@@ -46,7 +48,7 @@ public class UserEntityController {
 	@PutMapping("/")
 	public ResponseEntity<CommonResponseDto<UserEntity>> updateUserById(@RequestBody UserEntity user) {
 		var updatedUser = userEntityService.updateUser(user);
-		var crd = new CommonResponseDto<UserEntity>("User updated Successfully.", user);
+		var crd = new CommonResponseDto<UserEntity>("User updated Successfully.", updatedUser);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(crd);
 		
