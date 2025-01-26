@@ -15,7 +15,7 @@ import com.droute.userservice.service.EmailNotificationService;
 import com.droute.userservice.service.UserEntityService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/user/auth")
 public class AuthController {
 
 	@Autowired
@@ -28,9 +28,9 @@ public class AuthController {
 	public ResponseEntity<CommonResponseDto<UserEntity>> loginUser(@RequestParam String emailOrPhone,
 			@RequestParam String password) {
 		var isUserExist = userEntityService.checkUserExist(emailOrPhone, password);
-		if (isUserExist) {
+		if (isUserExist !=null) {
 			return ResponseEntity.status(HttpStatus.OK)
-					.body(new CommonResponseDto<UserEntity>("Logged in Successfully..", null));
+					.body(new CommonResponseDto<UserEntity>("Logged in Successfully..", isUserExist));
 		}
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(new CommonResponseDto<UserEntity>("Wrong password entered.", null));

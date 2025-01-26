@@ -1,5 +1,7 @@
 package com.droute.userservice.service;
 
+import java.util.Random;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +25,23 @@ public class UserEntityService {
 			throw new EntityAlreadyExistsException("User already exist with email = "+userDetails.getEmail());
 		}
 		user = new UserEntity(userDetails.getFullName(),userDetails.getEmail(), userDetails.getPassword(),userDetails.getRole(),userDetails.getContactNo());
+		user.setColorHexValue(getRandomColor());
 		return userEntityRepository.save(user);
 
 	}
+	
+	 public  String getRandomColor() {
+	        Random random = new Random();
+	        StringBuilder color = new StringBuilder("#");
+	        
+	        for (int i = 0; i < 6; i++) {
+	            // Restrict to darker shades by using lower hex values (0-8)
+	            int value = random.nextInt(8); // Generate a random number between 0 and 7
+	            color.append(Integer.toHexString(value));
+	        }
+	        
+	        return color.toString();
+	    }
 
 	public UserEntity findUserById(Long userId) {
 
@@ -46,7 +62,7 @@ public class UserEntityService {
 
 	}
 
-	public boolean checkUserExist(String emailOrPhone, String password) {
+	public UserEntity checkUserExist(String emailOrPhone, String password) {
 
 		UserEntity userByEmail = userEntityRepository.findByEmail(emailOrPhone);
 		UserEntity userByPhone = null;
@@ -57,13 +73,13 @@ public class UserEntityService {
 		if (userByEmail == null && userByPhone == null) {
 			throw new EntityNotFoundException("User not found with mail or phone no. = " + emailOrPhone);
 		}
-		if(userByPhone != null) {
-			return userByPhone.getPassword().equals(password);
+		else if(userByPhone != null && userByPhone.getPassword().equals(password)) {
+			return userByPhone;
 		}
-		if (userByEmail != null) {
-			return userByEmail.getPassword().equals(password);
+		else if (userByEmail != null && userByEmail.getPassword().equals(password)) {
+			return userByEmail;
 		}
-		return false;
+		return null;
 
 	}
 
