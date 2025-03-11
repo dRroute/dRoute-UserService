@@ -1,4 +1,4 @@
-package com.droute.userservice.dto;
+package com.droute.userservice.dto.response;
 
 public class CommonResponseDto<T> {
 	

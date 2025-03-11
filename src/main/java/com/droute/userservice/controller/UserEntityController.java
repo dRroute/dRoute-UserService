@@ -1,8 +1,12 @@
 package com.droute.userservice.controller;
 
+import org.slf4j.Logger;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,21 +16,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.droute.userservice.dto.CommonResponseDto;
-import com.droute.userservice.dto.RegisterUserRequestDto;
+import com.droute.userservice.dto.request.RegisterUserRequestDto;
+import com.droute.userservice.dto.response.CommonResponseDto;
 import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.service.UserEntityService;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin("*")
 public class UserEntityController {
 
+	private Logger logger = LoggerFactory.getLogger(UserEntityController.class);
 	@Autowired
 	private UserEntityService userEntityService;
 
+	@Hidden
 	@PostMapping("/")
 	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException {
+		logger.info("user register api called");
 		var createdUser = userEntityService.registerUser(userDetails);
 
 		var crd = new CommonResponseDto<UserEntity>("User created Successfully.", createdUser);
