@@ -35,13 +35,17 @@ public class UserEntityController {
 
 	@Hidden
 	@PostMapping("/")
-	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException {
+	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails)
+			throws EntityAlreadyExistsException {
 		logger.info("user register api called");
-		var createdUser = userEntityService.registerUser(userDetails);
+		if (userDetails.getRole().equalsIgnoreCase("user")) {
+			var createdUser = userEntityService.registerUser(userDetails);
+			var crd = new CommonResponseDto<UserEntity>("User created Successfully.", createdUser);
 
-		var crd = new CommonResponseDto<UserEntity>("User created Successfully.", createdUser);
+			return ResponseEntity.status(HttpStatus.CREATED).body(crd);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(crd);
+		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonResponseDto<>("Invalid role given", null));
 
 	}
 
@@ -54,26 +58,23 @@ public class UserEntityController {
 		return ResponseEntity.status(HttpStatus.OK).body(crd);
 
 	}
-	
+
 	@PutMapping("/")
 	public ResponseEntity<CommonResponseDto<UserEntity>> updateUserById(@RequestBody UserEntity user) {
 		var updatedUser = userEntityService.updateUser(user);
 		var crd = new CommonResponseDto<UserEntity>("User updated Successfully.", updatedUser);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(crd);
-		
+
 	}
-	
-	@DeleteMapping("/")
+
+	@DeleteMapping("/{userId}")
 	public ResponseEntity<CommonResponseDto<UserEntity>> deleteUserById(@PathVariable Long userId) {
-		 userEntityService.deleteUserById(userId);
+		userEntityService.deleteUserById(userId);
 		var crd = new CommonResponseDto<UserEntity>("User deleted Successfully.", null);
 
 		return ResponseEntity.status(HttpStatus.OK).body(crd);
-		
+
 	}
-	
-	
-	
 
 }
