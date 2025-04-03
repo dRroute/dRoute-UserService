@@ -38,7 +38,7 @@ public class UserEntityController {
 	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails)
 			throws EntityAlreadyExistsException {
 		logger.info("user register api called");
-		if (userDetails.getRole().equalsIgnoreCase("user")) {
+		if (userDetails.getRole().equalsIgnoreCase("driver")) {
 			var createdUser = userEntityService.registerUser(userDetails);
 			var crd = new CommonResponseDto<UserEntity>("User created Successfully.", createdUser);
 
