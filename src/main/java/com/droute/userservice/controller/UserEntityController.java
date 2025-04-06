@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
 import com.droute.userservice.dto.response.CommonResponseDto;
+import com.droute.userservice.dto.response.ResponseBuilder;
 import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.service.UserEntityService;
@@ -40,40 +41,32 @@ public class UserEntityController {
 		logger.info("user register api called");
 		if (userDetails.getRole().equalsIgnoreCase("driver")) {
 			var createdUser = userEntityService.registerUser(userDetails);
-			var crd = new CommonResponseDto<UserEntity>("User created Successfully.", createdUser);
-
-			return ResponseEntity.status(HttpStatus.CREATED).body(crd);
-
+			return ResponseBuilder.success(HttpStatus.OK, "Driver Created Successfully...", createdUser);
 		}
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CommonResponseDto<>("Invalid role given", null));
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Invalid role given", "USR_400_INVALID_ROLE");
 
 	}
 
 	@GetMapping("/{userId}")
 	public ResponseEntity<CommonResponseDto<UserEntity>> getUserById(@PathVariable Long userId) {
 		var user = userEntityService.findUserById(userId);
-
-		var crd = new CommonResponseDto<UserEntity>("User found Successfully.", user);
-
-		return ResponseEntity.status(HttpStatus.OK).body(crd);
+		return ResponseBuilder.success(HttpStatus.OK, "User founded successfully.", user);
 
 	}
 
 	@PutMapping("/")
 	public ResponseEntity<CommonResponseDto<UserEntity>> updateUserById(@RequestBody UserEntity user) {
 		var updatedUser = userEntityService.updateUser(user);
-		var crd = new CommonResponseDto<UserEntity>("User updated Successfully.", updatedUser);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(crd);
+	
+		return ResponseBuilder.success(HttpStatus.OK, "User Updated Successfully...", updatedUser);
 
 	}
 
 	@DeleteMapping("/{userId}")
 	public ResponseEntity<CommonResponseDto<UserEntity>> deleteUserById(@PathVariable Long userId) {
 		userEntityService.deleteUserById(userId);
-		var crd = new CommonResponseDto<UserEntity>("User deleted Successfully.", null);
+		return ResponseBuilder.success(HttpStatus.OK, "User Deleted Successfully...", null);
 
-		return ResponseEntity.status(HttpStatus.OK).body(crd);
 
 	}
 

@@ -1,23 +1,29 @@
 package com.droute.userservice.controller;
 
 import org.apache.coyote.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.droute.userservice.DrouteUserServiceApplication;
+import com.droute.userservice.dto.request.LoginUserRequestDto;
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
 import com.droute.userservice.dto.response.CommonResponseDto;
+import com.droute.userservice.dto.response.ResponseBuilder;
 import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.service.EmailNotificationService;
 import com.droute.userservice.service.UserEntityService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/api/user/auth")
@@ -30,35 +36,39 @@ public class AuthController {
 	@Autowired
 	private EmailNotificationService emailNotificationService;
 
-	@GetMapping("/login")
-	public ResponseEntity<CommonResponseDto<UserEntity>> loginUser(@RequestParam String emailOrPhone,
-			@RequestParam String password) {
-		var isUserExist = userEntityService.checkUserExist(emailOrPhone, password);
-		if (isUserExist !=null) {
-			return ResponseEntity.status(HttpStatus.OK)
-					.body(new CommonResponseDto<UserEntity>("Logged in Successfully..", isUserExist));
+	private static final Logger logger = LoggerFactory.getLogger(DrouteUserServiceApplication.class);
+
+	@PostMapping("/login")
+	public ResponseEntity<CommonResponseDto<UserEntity>> loginUser(@RequestBody LoginUserRequestDto loginDetails)
+			throws EntityNotFoundException, BadRequestException, IllegalArgumentException {
+		var isUserExist = userEntityService.checkUserExist(loginDetails);
+		if (isUserExist != null) {
+			return ResponseBuilder.success(HttpStatus.OK, "Logged in Successfully..", isUserExist);
 		}
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-				.body(new CommonResponseDto<UserEntity>("Wrong password entered.", null));
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Wrong password entered.", "USR_400_WRONG_PASSWORD");
 
 	}
 
 	@PostMapping("/sendOTP")
-	public ResponseEntity<String> sendOTPMail(@RequestParam("email") String recipientEmail) {
+	public ResponseEntity<CommonResponseDto<String>> sendOTPMail(@RequestParam("email") String recipientEmail) {
 		var otp = emailNotificationService.sendOtpNotification(recipientEmail);
 		if (otp != null) {
-			return ResponseEntity.ok(otp);
+			return ResponseBuilder.success(HttpStatus.OK,
+					"Otp has been sent successfully to the email : " + recipientEmail, null);
 		}
-		return ResponseEntity.badRequest().body(null);
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Failed to send OTP.", "USR_400_FAILED_TO_SEND_OTP");
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException, BadRequestException {
+	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails)
+			throws EntityAlreadyExistsException, BadRequestException {
+		logger.info("User sign-up called");
 		var createdUser = userEntityService.signUpUser(userDetails);
-
-		var crd = new CommonResponseDto<UserEntity>("User created Successfully.", createdUser);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(crd);
+		if (createdUser == null) {
+			return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Failed to create user.",
+					"USR_400_FAILED_TO_CREATE_USER");
+		}
+		return ResponseBuilder.success(HttpStatus.CREATED, "User created successfully.", createdUser);
 
 	}
 

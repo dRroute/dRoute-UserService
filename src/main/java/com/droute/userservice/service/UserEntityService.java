@@ -5,9 +5,13 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.droute.userservice.DrouteUserServiceApplication;
+import com.droute.userservice.dto.request.LoginUserRequestDto;
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
 import com.droute.userservice.entity.Role;
 import com.droute.userservice.entity.UserEntity;
@@ -22,11 +26,13 @@ public class UserEntityService {
 	@Autowired
 	private UserEntityRepository userEntityRepository;
 
+	private static final Logger logger = LoggerFactory.getLogger(DrouteUserServiceApplication.class);
+
 	// It is used by driver to register as a driver Role
 	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException {
 
 		var user = userEntityRepository.findByEmail(userDetails.getEmail());
-		
+
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.DRIVER)) {
 			throw new EntityAlreadyExistsException("User already exist with email = " + userDetails.getEmail());
@@ -53,7 +59,7 @@ public class UserEntityService {
 		user.setPassword(userDetails.getPassword());
 		user.setRoles(roles);
 		user.setColorHexValue(getRandomColor());
-	
+
 		return userEntityRepository.save(user);
 
 	}
@@ -61,11 +67,13 @@ public class UserEntityService {
 	// It is used by user to register as a user Role
 	public UserEntity signUpUser(RegisterUserRequestDto userDetails)
 			throws EntityAlreadyExistsException, BadRequestException {
+		logger.info("userDetails = " + userDetails);
 		if (!userDetails.getRole().equalsIgnoreCase("user")) {
+			logger.error("Role should be user");
 			throw new BadRequestException("Role should be user");
 		}
 		var user = userEntityRepository.findByEmail(userDetails.getEmail());
-		
+
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.USER)) {
 			throw new EntityAlreadyExistsException("User already exist with email = " + userDetails.getEmail());
@@ -92,7 +100,7 @@ public class UserEntityService {
 		user.setPassword(userDetails.getPassword());
 		user.setRoles(roles);
 		user.setColorHexValue(getRandomColor());
-	
+
 		return userEntityRepository.save(user);
 
 	}
@@ -129,19 +137,24 @@ public class UserEntityService {
 
 	}
 
-	public UserEntity checkUserExist(String emailOrPhone, String password) {
+	public UserEntity checkUserExist(LoginUserRequestDto loginDetails)
+			throws EntityNotFoundException, BadRequestException, IllegalArgumentException {
 
-		UserEntity userByEmail = userEntityRepository.findByEmail(emailOrPhone);
+		UserEntity userByEmail = userEntityRepository.findByEmail(loginDetails.getEmailOrPhone());
 		UserEntity userByPhone = null;
 		if (userByEmail == null) {
-			userByPhone = userEntityRepository.findByContactNo(emailOrPhone);
+			userByPhone = userEntityRepository.findByContactNo(loginDetails.getEmailOrPhone());
 		}
 
 		if (userByEmail == null && userByPhone == null) {
-			throw new EntityNotFoundException("User not found with mail or phone no. = " + emailOrPhone);
-		} else if (userByPhone != null && userByPhone.getPassword().equals(password)) {
+			throw new EntityNotFoundException(
+					"User not found with mail or phone no. = " + loginDetails.getEmailOrPhone());
+		} else if (userByPhone != null &&
+				userByPhone.getPassword().equals(loginDetails.getPassword())
+				&& userByPhone.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
 			return userByPhone;
-		} else if (userByEmail != null && userByEmail.getPassword().equals(password)) {
+		} else if (userByEmail != null && userByEmail.getPassword().equals(loginDetails.getPassword())
+				&& userByEmail.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
 			return userByEmail;
 		}
 		return null;
