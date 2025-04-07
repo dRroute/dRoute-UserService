@@ -1,5 +1,6 @@
 package com.droute.userservice.service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -8,6 +9,7 @@ import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.droute.userservice.DrouteUserServiceApplication;
@@ -29,7 +31,7 @@ public class UserEntityService {
 	private static final Logger logger = LoggerFactory.getLogger(DrouteUserServiceApplication.class);
 
 	// It is used by driver to register as a driver Role
-	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException {
+	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException, DataIntegrityViolationException {
 
 		var user = userEntityRepository.findByEmail(userDetails.getEmail());
 
