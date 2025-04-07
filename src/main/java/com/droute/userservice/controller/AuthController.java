@@ -41,6 +41,7 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<CommonResponseDto<UserEntity>> loginUser(@RequestBody LoginUserRequestDto loginDetails)
 			throws EntityNotFoundException, BadRequestException, IllegalArgumentException {
+				System.out.println("user service login called");
 		var isUserExist = userEntityService.checkUserExist(loginDetails);
 		if (isUserExist != null) {
 			return ResponseBuilder.success(HttpStatus.OK, "Logged in Successfully..", isUserExist);

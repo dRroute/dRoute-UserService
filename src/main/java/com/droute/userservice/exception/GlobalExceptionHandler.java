@@ -1,5 +1,7 @@
 package com.droute.userservice.exception;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +53,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		logger.error(exception.getMessage());
 
 		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, exception.getMessage(), "USR_400_BAD_REQUEST");
+
+	}
+	@ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+	public ResponseEntity<CommonResponseDto<UserEntity>> handleSQLIntegrityConstraintViolationException(
+		SQLIntegrityConstraintViolationException exception) {
+
+		logger.error(exception.getMessage());
+
+		return ResponseBuilder.failure(HttpStatus.CONFLICT, exception.getMessage(), "USR_409_CONFLICT");
 
 	}
 
