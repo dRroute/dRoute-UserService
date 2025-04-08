@@ -1,6 +1,5 @@
 package com.droute.userservice.service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
