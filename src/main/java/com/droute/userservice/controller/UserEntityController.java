@@ -1,7 +1,7 @@
 package com.droute.userservice.controller;
 
+import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
-
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,7 +37,7 @@ public class UserEntityController {
 	@Hidden
 	@PostMapping("/")
 	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails)
-			throws EntityAlreadyExistsException {
+			throws EntityAlreadyExistsException, BadRequestException  {
 		logger.info("user register api called");
 		if (userDetails.getRole().equalsIgnoreCase("driver")) {
 			var createdUser = userEntityService.registerUser(userDetails);

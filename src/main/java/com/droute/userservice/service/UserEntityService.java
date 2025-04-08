@@ -8,6 +8,7 @@ import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.droute.userservice.DrouteUserServiceApplication;
@@ -26,16 +27,20 @@ public class UserEntityService {
 	@Autowired
 	private UserEntityRepository userEntityRepository;
 
+	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 	private static final Logger logger = LoggerFactory.getLogger(DrouteUserServiceApplication.class);
 
 	// It is used by driver to register as a driver Role
-	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException {
+	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws EntityAlreadyExistsException, BadRequestException  {
 
 		var user = userEntityRepository.findByEmail(userDetails.getEmail());
 
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.DRIVER)) {
 			throw new EntityAlreadyExistsException("User already exist with email = " + userDetails.getEmail());
+		} else if (!userDetails.getPassword().equals(userDetails.getConfirmPassword())) {
+			throw new BadRequestException("password and confirm password didn't match !");
 		}
 
 		// If user already exist with user role then add new role as driver
@@ -44,7 +49,7 @@ public class UserEntityService {
 			user.setContactNo(userDetails.getContactNo());
 			user.setEmail(userDetails.getEmail());
 			user.setFullName(userDetails.getFullName());
-			user.setPassword(userDetails.getPassword());
+			user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 			user.setColorHexValue(getRandomColor());
 			return userEntityRepository.save(user);
 		}
@@ -56,7 +61,7 @@ public class UserEntityService {
 		user.setContactNo(userDetails.getContactNo());
 		user.setEmail(userDetails.getEmail());
 		user.setFullName(userDetails.getFullName());
-		user.setPassword(userDetails.getPassword());
+		user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 		user.setRoles(roles);
 		user.setColorHexValue(getRandomColor());
 
@@ -85,7 +90,7 @@ public class UserEntityService {
 			user.setContactNo(userDetails.getContactNo());
 			user.setEmail(userDetails.getEmail());
 			user.setFullName(userDetails.getFullName());
-			user.setPassword(userDetails.getPassword());
+			user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 			user.setColorHexValue(getRandomColor());
 			return userEntityRepository.save(user);
 		}
@@ -97,7 +102,7 @@ public class UserEntityService {
 		user.setContactNo(userDetails.getContactNo());
 		user.setEmail(userDetails.getEmail());
 		user.setFullName(userDetails.getFullName());
-		user.setPassword(userDetails.getPassword());
+		user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 		user.setRoles(roles);
 		user.setColorHexValue(getRandomColor());
 
