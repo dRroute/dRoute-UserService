@@ -51,7 +51,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/sendOTP")
-	public ResponseEntity<CommonResponseDto<String>> sendOTPMail(@RequestParam("email") String recipientEmail) {
+	public ResponseEntity<CommonResponseDto<String>> sendOTPMail(@RequestBody String recipientEmail) {
 		var otp = emailNotificationService.sendOtpNotification(recipientEmail);
 		if (otp != null) {
 			return ResponseBuilder.success(HttpStatus.OK,

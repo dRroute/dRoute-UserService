@@ -51,10 +51,9 @@ public class UserEntityController {
 	public ResponseEntity<CommonResponseDto<UserEntity>> getUserById(@PathVariable Long userId) {
 		var user = userEntityService.findUserById(userId);
 		return ResponseBuilder.success(HttpStatus.OK, "User founded successfully.", user);
-
 	}
 
-	@PutMapping("/")
+	@PutMapping("")
 	public ResponseEntity<CommonResponseDto<UserEntity>> updateUserById(@RequestBody UserEntity user) {
 		var updatedUser = userEntityService.updateUser(user);
 	

@@ -126,7 +126,7 @@ public class UserEntityService {
 
 	public UserEntity findUserById(Long userId) {
 
-		return userEntityRepository.findById(userId).orElse(null);
+		return userEntityRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id = " + userId));
 
 	}
 
@@ -156,10 +156,11 @@ public class UserEntityService {
 			throw new EntityNotFoundException(
 					"User not found with mail or phone no. = " + loginDetails.getEmailOrPhone());
 		} else if (userByPhone != null &&
-				userByPhone.getPassword().equals(loginDetails.getPassword())
+		passwordEncoder.matches(loginDetails.getPassword(), userByPhone.getPassword())
+
 				&& userByPhone.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
 			return userByPhone;
-		} else if (userByEmail != null && userByEmail.getPassword().equals(loginDetails.getPassword())
+		} else if (userByEmail != null && passwordEncoder.matches(loginDetails.getPassword(), userByEmail.getPassword())
 				&& userByEmail.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
 			return userByEmail;
 		}
