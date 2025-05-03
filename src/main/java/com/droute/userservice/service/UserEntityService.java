@@ -143,6 +143,10 @@ public class UserEntityService {
 
 	}
 
+
+	public boolean checkUserExistById(Long userId) throws EntityNotFoundException {
+		return userEntityRepository.existsById(userId);
+	}
 	public UserEntity checkUserExist(LoginUserRequestDto loginDetails)
 			throws EntityNotFoundException, BadRequestException, IllegalArgumentException {
 

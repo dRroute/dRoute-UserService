@@ -24,6 +24,8 @@ import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.service.UserEntityService;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/user")
@@ -52,6 +54,17 @@ public class UserEntityController {
 		var user = userEntityService.findUserById(userId);
 		return ResponseBuilder.success(HttpStatus.OK, "User founded successfully.", user);
 	}
+
+	@GetMapping("/exist/{userId}")
+	public ResponseEntity<CommonResponseDto<Boolean>> checkUserExistById(@PathVariable Long userId) {
+		var result = userEntityService.checkUserExistById(userId);
+		if(!result) {
+			return ResponseBuilder.failure(HttpStatus.NOT_FOUND, "User not found", "USR_404_NOT_FOUND");
+		}
+		return ResponseBuilder.success(HttpStatus.OK, "User founded successfully.", result);
+	}
+	
+
 
 	@PutMapping("")
 	public ResponseEntity<CommonResponseDto<UserEntity>> updateUserById(@RequestBody UserEntity user) {
