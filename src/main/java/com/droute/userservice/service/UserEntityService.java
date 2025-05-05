@@ -8,13 +8,14 @@ import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.droute.userservice.DrouteUserServiceApplication;
 import com.droute.userservice.dto.request.LoginUserRequestDto;
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
+import com.droute.userservice.dto.request.ResetPasswordRequestDTO;
 import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.enums.Role;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
@@ -35,7 +36,7 @@ public class UserEntityService {
 	// It is used by driver to register as a driver Role
 	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws BadRequestException, EntityAlreadyExistsException, DataIntegrityViolationException {
 
-		var user = userEntityRepository.findByEmail(userDetails.getEmail());
+		var user = userEntityRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found with email = " + userDetails.getEmail()));
 
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.DRIVER)) {
@@ -78,7 +79,7 @@ public class UserEntityService {
 			logger.error("Role should be user");
 			throw new BadRequestException("Role should be user");
 		}
-		var user = userEntityRepository.findByEmail(userDetails.getEmail());
+		var user = userEntityRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found with email = " + userDetails.getEmail()));
 
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.USER)) {
@@ -150,7 +151,7 @@ public class UserEntityService {
 	public UserEntity checkUserExist(LoginUserRequestDto loginDetails)
 			throws EntityNotFoundException, BadRequestException, IllegalArgumentException {
 
-		UserEntity userByEmail = userEntityRepository.findByEmail(loginDetails.getEmailOrPhone());
+		UserEntity userByEmail = userEntityRepository.findByEmail(loginDetails.getEmailOrPhone()).get();
 		UserEntity userByPhone = null;
 		if (userByEmail == null) {
 			userByPhone = userEntityRepository.findByContactNo(loginDetails.getEmailOrPhone());
@@ -171,5 +172,15 @@ public class UserEntityService {
 		return null;
 
 	}
+
+
+	 public void updatePassword(ResetPasswordRequestDTO requestDTO) {
+        UserEntity user = userEntityRepository.findByEmail(requestDTO.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email = " + requestDTO.getEmail()));
+
+        user.setPassword(passwordEncoder.encode(requestDTO.getNewPassword()));  // set the encoded password
+        userEntityRepository.save(user);
+    }
+	
 
 }

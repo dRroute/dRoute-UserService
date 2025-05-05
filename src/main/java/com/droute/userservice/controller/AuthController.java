@@ -8,14 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.droute.userservice.DrouteUserServiceApplication;
 import com.droute.userservice.dto.request.LoginUserRequestDto;
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
+import com.droute.userservice.dto.request.ResetPasswordRequestDTO;
 import com.droute.userservice.dto.response.CommonResponseDto;
 import com.droute.userservice.dto.response.ResponseBuilder;
 import com.droute.userservice.entity.UserEntity;
@@ -72,5 +73,13 @@ public class AuthController {
 		return ResponseBuilder.success(HttpStatus.CREATED, "User created successfully.", createdUser);
 
 	}
+
+	 @PutMapping("/reset-password")
+    public ResponseEntity<CommonResponseDto<String>> updatePassword( @RequestBody ResetPasswordRequestDTO requestDTO) {
+        userEntityService.updatePassword(requestDTO);
+
+		return ResponseBuilder.success(HttpStatus.OK, "Password updated successfully.", null);
+    }
+	
 
 }
