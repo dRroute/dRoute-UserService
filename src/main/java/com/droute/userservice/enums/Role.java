@@ -1,4 +1,4 @@
-package com.droute.userservice.entity;
+package com.droute.userservice.enums;
 
 public enum Role {
     ADMIN,

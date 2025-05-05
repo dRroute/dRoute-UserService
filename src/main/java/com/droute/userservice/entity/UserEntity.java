@@ -1,7 +1,16 @@
 package com.droute.userservice.entity;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.droute.userservice.enums.Role;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -13,6 +22,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,10 +34,10 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = { "couriers" })
 public class UserEntity {
 
-	@Id  
+	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userId;
 
@@ -49,5 +59,16 @@ public class UserEntity {
 
 	@Column(nullable = false)
 	private String colorHexValue;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Courier> couriers = new ArrayList<>();
+
+	@CreationTimestamp
+	@Column(name = "created_at", updatable = false)
+	private LocalDateTime createdAt;
+
+	@UpdateTimestamp
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
 }

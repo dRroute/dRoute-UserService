@@ -5,11 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableFeignClients(basePackages = "com.droute.userservice.feign.client")
+
 public class DrouteUserServiceApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger(DrouteUserServiceApplication.class);

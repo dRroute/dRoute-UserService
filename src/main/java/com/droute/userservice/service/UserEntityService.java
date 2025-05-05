@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import com.droute.userservice.DrouteUserServiceApplication;
 import com.droute.userservice.dto.request.LoginUserRequestDto;
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
-import com.droute.userservice.entity.Role;
 import com.droute.userservice.entity.UserEntity;
+import com.droute.userservice.enums.Role;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.repository.UserEntityRepository;
 
