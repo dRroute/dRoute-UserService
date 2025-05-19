@@ -4,6 +4,8 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.mail.SendFailedException;
+
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +96,18 @@ public class GlobalExceptionHandler {
 		ex.getBindingResult().getFieldErrors()
 				.forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+	}
+	@ExceptionHandler(SendFailedException.class)
+	public ResponseEntity<?> handleValidationErrors(SendFailedException exception) {
+		logger.error(exception.getMessage());
+
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, exception.getMessage(), "USR_400_BAD_REQUEST");
+	}
+	@ExceptionHandler(com.sun.mail.smtp.SMTPAddressFailedException.class)
+	public ResponseEntity<?> handleValidationErrors(com.sun.mail.smtp.SMTPAddressFailedException exception) {
+		logger.error(exception.getMessage());
+
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, exception.getMessage(), "USR_400_BAD_REQUEST");
 	}
 
 }

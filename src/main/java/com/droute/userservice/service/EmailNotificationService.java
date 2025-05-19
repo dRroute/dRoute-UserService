@@ -7,6 +7,7 @@ import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
+import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class EmailNotificationService {
 
 	private final String fromEmail = "droute.info@gmail.com"; // Sender's email
-	private final String appPassword = "psgj dpqi ryqi mwyz"; // App password
+	private final String appPassword = "hccg ztfg tfrm aoct"; // App password
 
 	private final Logger logger = LoggerFactory.getLogger(EmailNotificationService.class);
 
@@ -80,7 +81,7 @@ public class EmailNotificationService {
 	 * 
 	 */
 
-	public String sendOtpNotification(String recipientEmail) {
+	public String sendOtpNotification(String recipientEmail) throws SendFailedException, com.sun.mail.smtp.SMTPAddressFailedException {
 		// SMTP server configuration
 		Properties properties = new Properties();
 		properties.put("mail.smtp.host", "smtp.gmail.com");
@@ -105,7 +106,7 @@ public class EmailNotificationService {
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(fromEmail));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-			message.setSubject(" Your 6-digit OTP(One time Password) to join 🚚🚚 dRoute 🚚🚚!");
+			message.setSubject(" Your 4-digit OTP(One time Password) to join 🚚🚚 dRoute 🚚🚚!");
 
 			// Create the email body
 			String emailBody = """
@@ -138,10 +139,10 @@ public class EmailNotificationService {
 	}
 
 	private String generateOtp() {
-		Random random = new Random();
-		int otp = 100000 + random.nextInt(900000); // Generate 6-digit OTP
-		return String.valueOf(otp);
-	}
+    Random random = new Random();
+    int otp = 1000 + random.nextInt(9000); // Generate 4-digit OTP
+    return String.valueOf(otp);
+}
 
 }
 

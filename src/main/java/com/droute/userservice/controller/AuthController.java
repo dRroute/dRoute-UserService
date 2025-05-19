@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.droute.userservice.DrouteUserServiceApplication;
 import com.droute.userservice.dto.request.LoginUserRequestDto;
+import com.droute.userservice.dto.request.OtpRequestDto;
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
 import com.droute.userservice.dto.request.ResetPasswordRequestDTO;
 import com.droute.userservice.dto.response.CommonResponseDto;
@@ -37,7 +37,7 @@ public class AuthController {
 	@Autowired
 	private EmailNotificationService emailNotificationService;
 
-	private static final Logger logger = LoggerFactory.getLogger(DrouteUserServiceApplication.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	@PostMapping("/login")
 	public ResponseEntity<CommonResponseDto<UserEntity>> loginUser(@RequestBody LoginUserRequestDto loginDetails)
@@ -52,14 +52,15 @@ public class AuthController {
 	}
 
 	@PostMapping("/sendOTP")
-	public ResponseEntity<CommonResponseDto<String>> sendOTPMail(@RequestBody String recipientEmail) {
-		var otp = emailNotificationService.sendOtpNotification(recipientEmail);
+	public ResponseEntity<CommonResponseDto<String>> sendOTPMail(@RequestBody OtpRequestDto request) throws javax.mail.SendFailedException, com.sun.mail.smtp.SMTPAddressFailedException{
+		var otp = emailNotificationService.sendOtpNotification(request.getEmail());
 		if (otp != null) {
 			return ResponseBuilder.success(HttpStatus.OK,
-					"Otp has been sent successfully to the email : " + recipientEmail, null);
+					"Otp has been sent successfully to the email : " + request.getEmail(), otp);
 		}
-		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Failed to send OTP.", "USR_400_FAILED_TO_SEND_OTP");
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Invalid email address given.", "USR_400_BAD_REQUEST");
 	}
+	
 
 	@PostMapping("/signup")
 	public ResponseEntity<CommonResponseDto<UserEntity>> createUser(@RequestBody RegisterUserRequestDto userDetails)
