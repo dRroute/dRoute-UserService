@@ -41,6 +41,11 @@ public class CourierService {
         return toResponse(courier);
     }
 
+    // Check if Courier exists
+    public boolean courierExistsById(long courierId) {
+        return courierRepository.existsById(courierId);
+    }
+
     // Read (All)
     public List<CourierDetailResponseDto> getAllCouriers() {
         return courierRepository.findAll().stream()

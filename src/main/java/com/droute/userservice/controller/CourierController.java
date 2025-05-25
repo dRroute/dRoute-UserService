@@ -1,7 +1,5 @@
 package com.droute.userservice.controller;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.droute.userservice.dto.request.CourierDetailsRequestDto;
@@ -67,6 +64,12 @@ public class CourierController {
     public ResponseEntity<CommonResponseDto<CourierDetailResponseDto>> getCourierById(@PathVariable Long courierId) {
         var data = courierService.getCourierById(courierId);
         return ResponseBuilder.success(HttpStatus.OK, "Courier details founded successfully", data);
+    }
+
+    @GetMapping("/{courierId}/exists")
+    public ResponseEntity<CommonResponseDto<Boolean>> courierExistsById(@PathVariable Long courierId) {
+        boolean exists = courierService.courierExistsById(courierId);
+        return ResponseBuilder.success(HttpStatus.OK, "Courier existence checked successfully", exists);
     }
 
     @PutMapping("/{courierId}")
