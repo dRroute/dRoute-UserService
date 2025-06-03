@@ -34,13 +34,14 @@ public class UserEntityService {
 	private static final Logger logger = LoggerFactory.getLogger(DrouteUserServiceApplication.class);
 
 	// It is used by driver to register as a driver Role
-	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws BadRequestException, EntityAlreadyExistsException, DataIntegrityViolationException {
+	public UserEntity registerUser(RegisterUserRequestDto userDetails)
+			throws BadRequestException, EntityAlreadyExistsException, DataIntegrityViolationException {
 
 		var user = userEntityRepository.getByEmailOrContactNo(userDetails.getEmail(), userDetails.getContactNo());
 
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.DRIVER)) {
-			throw new EntityAlreadyExistsException("User already exist with either email = " + userDetails.getEmail() + 
+			throw new EntityAlreadyExistsException("User already exist with either email = " + userDetails.getEmail() +
 					" or contact no = " + userDetails.getContactNo());
 		} else if (!userDetails.getPassword().equals(userDetails.getConfirmPassword())) {
 			throw new BadRequestException("password and confirm password didn't match !");
@@ -80,7 +81,8 @@ public class UserEntityService {
 			logger.error("Role should be user");
 			throw new BadRequestException("Role should be user");
 		}
-		var user = userEntityRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found with email = " + userDetails.getEmail()));
+		var user = userEntityRepository.findByEmail(userDetails.getEmail()).orElseThrow(
+				() -> new EntityNotFoundException("User not found with email = " + userDetails.getEmail()));
 
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.USER)) {
@@ -128,7 +130,8 @@ public class UserEntityService {
 
 	public UserEntity findUserById(Long userId) {
 
-		return userEntityRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id = " + userId));
+		return userEntityRepository.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("User not found with id = " + userId));
 
 	}
 
@@ -145,43 +148,42 @@ public class UserEntityService {
 
 	}
 
-
 	public boolean checkUserExistById(Long userId) throws EntityNotFoundException {
 		return userEntityRepository.existsById(userId);
 	}
+
 	public UserEntity checkUserExist(LoginUserRequestDto loginDetails)
 			throws EntityNotFoundException, BadRequestException, IllegalArgumentException {
 
-		UserEntity userByEmail = userEntityRepository.findByEmail(loginDetails.getEmailOrPhone()).get();
-		UserEntity userByPhone = null;
-		if (userByEmail == null) {
-			userByPhone = userEntityRepository.findByContactNo(loginDetails.getEmailOrPhone());
-		}
+		UserEntity userByEmailOrPhone = userEntityRepository.getByEmailOrContactNo(loginDetails.getEmailOrPhone(),
+				loginDetails.getEmailOrPhone());
 
-		if (userByEmail == null && userByPhone == null) {
+		if (userByEmailOrPhone == null) {
 			throw new EntityNotFoundException(
-					"User not found with mail or phone no. = " + loginDetails.getEmailOrPhone());
-		} else if (userByPhone != null &&
-		passwordEncoder.matches(loginDetails.getPassword(), userByPhone.getPassword())
+					"Email or Phone = " + loginDetails.getEmailOrPhone() + " doesn't exists. Please register first.");
+		} else if (userByEmailOrPhone != null &&
+				passwordEncoder.matches(loginDetails.getPassword(), userByEmailOrPhone.getPassword())
 
-				&& userByPhone.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
-			return userByPhone;
-		} else if (userByEmail != null && passwordEncoder.matches(loginDetails.getPassword(), userByEmail.getPassword())
-				&& userByEmail.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
-			return userByEmail;
+				&& userByEmailOrPhone.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
+			return userByEmailOrPhone;
+		}
+		else if (userByEmailOrPhone != null && !passwordEncoder.matches(loginDetails.getPassword(),
+				userByEmailOrPhone.getPassword())) {
+			throw new BadRequestException("Wrong password entered.");
+		} else if (userByEmailOrPhone != null
+				&& !userByEmailOrPhone.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
+			throw new IllegalArgumentException("Role not matched with user account.");
 		}
 		return null;
 
 	}
 
+	public void updatePassword(ResetPasswordRequestDTO requestDTO) {
+		UserEntity user = userEntityRepository.findByEmail(requestDTO.getEmail())
+				.orElseThrow(() -> new EntityNotFoundException("User not found with email = " + requestDTO.getEmail()));
 
-	 public void updatePassword(ResetPasswordRequestDTO requestDTO) {
-        UserEntity user = userEntityRepository.findByEmail(requestDTO.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email = " + requestDTO.getEmail()));
-
-        user.setPassword(passwordEncoder.encode(requestDTO.getNewPassword()));  // set the encoded password
-        userEntityRepository.save(user);
-    }
-	
+		user.setPassword(passwordEncoder.encode(requestDTO.getNewPassword())); // set the encoded password
+		userEntityRepository.save(user);
+	}
 
 }
