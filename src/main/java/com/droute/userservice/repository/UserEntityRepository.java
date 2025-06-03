@@ -16,8 +16,14 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, Long> {
 
     // Find a user by email to check if the user already exists
     Optional<UserEntity> findByEmail(String email);
+    UserEntity getByEmailOrContactNo(String email, String contactNo);
 
 	UserEntity findByContactNo(String contactNo);
+
+    //check if user exists by email or contactNo
+    boolean existsByEmailOrContactNo(String email, String contactNo);
+
+
 
 	boolean existsByEmailAndPassword(String email, String password);
 }

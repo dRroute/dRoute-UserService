@@ -36,11 +36,12 @@ public class UserEntityService {
 	// It is used by driver to register as a driver Role
 	public UserEntity registerUser(RegisterUserRequestDto userDetails) throws BadRequestException, EntityAlreadyExistsException, DataIntegrityViolationException {
 
-		var user = userEntityRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found with email = " + userDetails.getEmail()));
+		var user = userEntityRepository.getByEmailOrContactNo(userDetails.getEmail(), userDetails.getContactNo());
 
 		// If user already exist with driver role then throw exception
 		if (user != null && user.getRoles().contains(Role.DRIVER)) {
-			throw new EntityAlreadyExistsException("User already exist with email = " + userDetails.getEmail());
+			throw new EntityAlreadyExistsException("User already exist with either email = " + userDetails.getEmail() + 
+					" or contact no = " + userDetails.getContactNo());
 		} else if (!userDetails.getPassword().equals(userDetails.getConfirmPassword())) {
 			throw new BadRequestException("password and confirm password didn't match !");
 		}
