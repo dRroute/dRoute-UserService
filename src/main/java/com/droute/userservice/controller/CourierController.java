@@ -19,6 +19,7 @@ import com.droute.userservice.dto.request.CourierDetailsRequestDto;
 import com.droute.userservice.dto.response.CommonResponseDto;
 import com.droute.userservice.dto.response.CourierDetailResponseDto;
 import com.droute.userservice.dto.response.ResponseBuilder;
+import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.feign.client.DriverServiceClient;
 import com.droute.userservice.service.CourierService;
 
@@ -38,16 +39,29 @@ public class CourierController {
     private static final Logger logger = LoggerFactory.getLogger(CourierController.class);
 
 
+    //API to get user-details by courierId
+    @GetMapping("/{courierId}/user-details")
+    public ResponseEntity<CommonResponseDto<UserEntity>>  getUserDetailsByCourierId(@PathVariable Long courierId) {
+        // Fetch courier details from DB
+        var userDetails = courierService.getUserByCourierId(courierId);
+        if (userDetails == null) {
+            return ResponseBuilder.failure(HttpStatus.NOT_FOUND, "Courier not found", "USR_404_COURIER_NOT_FOUND");
+        }
+        return ResponseBuilder.success(HttpStatus.OK, "User details fetched", userDetails);
+    }
+
+    
     //API to get jouney by courier
-    @GetMapping("/journeys/{courierId}")
+    @GetMapping("/{courierId}/journeys")
     public ResponseEntity<?> getJourneysBasedOnCourier(@PathVariable Long courierId) {
         // Fetch courier details from DB
         var courierDetail = courierService.getCourierById(courierId);
 
         // Call Driver Service via RestTemplate or WebClient
-        var journeys = driverServiceClient.getJourneysByCourierConditions(courierDetail);
+        var response = driverServiceClient.getJourneysByCourierConditions(courierDetail);
+        
 
-        return ResponseBuilder.success(HttpStatus.OK, "Journeys fetched", journeys);
+        return ResponseBuilder.success(HttpStatus.OK, response.getMessage(), response.getData());
     }
 
     @PostMapping("")

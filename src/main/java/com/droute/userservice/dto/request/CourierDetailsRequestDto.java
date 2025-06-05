@@ -1,8 +1,9 @@
 package com.droute.userservice.dto.request;
 
-import com.droute.userservice.enums.DimensionUnit;
-import com.droute.userservice.enums.WeightUnit;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,13 +42,13 @@ public class CourierDetailsRequestDto {
     private Double courierLength;
     
     @NotNull(message = "Dimension unit is required")
-    private DimensionUnit courierDimensionUnit;
+    private String courierDimensionUnit;
     
     @Positive(message = "Weight must be positive")
     private Double courierWeight;
     
     @NotNull(message = "Weight unit is required")
-    private WeightUnit courierWeightUnit;
+    private String courierWeightUnit;
     
     @PositiveOrZero(message = "Value must be positive or zero")
     private Double courierValue;

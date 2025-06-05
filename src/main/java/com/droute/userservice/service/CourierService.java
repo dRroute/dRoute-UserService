@@ -8,6 +8,8 @@ import com.droute.userservice.dto.request.CourierDetailsRequestDto;
 import com.droute.userservice.dto.response.CourierDetailResponseDto;
 import com.droute.userservice.entity.Courier;
 import com.droute.userservice.entity.UserEntity;
+import com.droute.userservice.enums.DimensionUnit;
+import com.droute.userservice.enums.WeightUnit;
 import com.droute.userservice.repository.CourierRepository;
 import com.droute.userservice.repository.UserEntityRepository;
 
@@ -67,9 +69,9 @@ public class CourierService {
         existingCourier.setCourierHeight(courierDetails.getCourierHeight());
         existingCourier.setCourierWidth(courierDetails.getCourierWidth());
         existingCourier.setCourierLength(courierDetails.getCourierLength());
-        existingCourier.setCourierDimensionUnit(courierDetails.getCourierDimensionUnit());
+        existingCourier.setCourierDimensionUnit(DimensionUnit.fromAbbreviation(courierDetails.getCourierDimensionUnit().toLowerCase()));
         existingCourier.setCourierWeight(courierDetails.getCourierWeight());
-        existingCourier.setCourierWeightUnit(courierDetails.getCourierWeightUnit());
+        existingCourier.setCourierWeightUnit(WeightUnit.fromAbbreviation((courierDetails.getCourierWeightUnit().toLowerCase())));
         existingCourier.setCourierValue(courierDetails.getCourierValue());
 
         // Only update user if different
@@ -138,10 +140,17 @@ public class CourierService {
         .courierHeight(request.getCourierHeight())
         .courierWidth(request.getCourierWidth())
         .courierLength(request.getCourierLength())
-        .courierDimensionUnit(request.getCourierDimensionUnit())
+        .courierDimensionUnit(DimensionUnit.fromAbbreviation(request.getCourierDimensionUnit()))
         .courierWeight(request.getCourierWeight())
-        .courierWeightUnit(request.getCourierWeightUnit())
+        .courierWeightUnit(WeightUnit.fromAbbreviation(request.getCourierWeightUnit()))
         .courierValue(request.getCourierValue())
         .build();
 }
+
+    public UserEntity getUserByCourierId(Long courierId) {
+        
+        return courierRepository.findById(courierId)
+                .orElseThrow(() -> new EntityNotFoundException("Courier not found with id = " + courierId))
+                .getUser();
+    }
 }
