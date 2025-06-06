@@ -1,6 +1,8 @@
 package com.droute.userservice.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -16,12 +18,15 @@ import com.droute.userservice.DrouteUserServiceApplication;
 import com.droute.userservice.dto.request.LoginUserRequestDto;
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
 import com.droute.userservice.dto.request.ResetPasswordRequestDTO;
+import com.droute.userservice.dto.response.CourierDetailResponseDto;
+import com.droute.userservice.entity.Courier;
 import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.enums.Role;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.repository.UserEntityRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserEntityService {
@@ -184,6 +189,43 @@ public class UserEntityService {
 
 		user.setPassword(passwordEncoder.encode(requestDTO.getNewPassword())); // set the encoded password
 		userEntityRepository.save(user);
+	}
+
+	@Transactional
+    public List<CourierDetailResponseDto> getAllCourierByUserId(Long userId) {
+
+		var couriers = findUserById(userId).getCouriers();
+
+		System.out.println("couriers = " + couriers);
+
+		List<CourierDetailResponseDto> data = new ArrayList<>();
+
+		for (Courier courier : couriers) {
+			var dto = CourierDetailResponseDto.builder()
+						.courierId(courier.getCourierId())
+						.courierDestinationAddress(courier.getCourierDestinationAddress())
+						.courierDestinationCoordinate(courier.getCourierDestinationCoordinate())
+						.courierDimensionUnit(courier.getCourierDimensionUnit())
+						.courierHeight(courier.getCourierHeight())
+						.courierLength(courier.getCourierLength())
+						.courierWidth(courier.getCourierWidth())
+						.courierSourceAddress(courier.getCourierSourceAddress())
+						.courierSourceCoordinate(courier.getCourierSourceCoordinate())
+						.courierValue(courier.getCourierValue())
+						.courierWeight(courier.getCourierWeight())
+						.courierWeightUnit(courier.getCourierWeightUnit())
+						.userId(courier.getUser().getUserId())
+						.createdAt(courier.getCreatedAt())
+						.updatedAt(courier.getUpdatedAt())
+						.build();
+				data.add(dto);
+		}
+
+		
+					
+
+		return data;
+       
 	}
 
 }

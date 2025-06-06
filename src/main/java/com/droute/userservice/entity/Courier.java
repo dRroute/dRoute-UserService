@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.droute.userservice.enums.CourierStatus;
 import com.droute.userservice.enums.DimensionUnit;
 import com.droute.userservice.enums.WeightUnit;
 
@@ -58,6 +59,9 @@ public class Courier {
     private WeightUnit courierWeightUnit;
     
     private Double courierValue;
+
+    @Enumerated(EnumType.STRING)
+    private CourierStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

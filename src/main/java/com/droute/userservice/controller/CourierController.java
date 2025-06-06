@@ -1,5 +1,7 @@
 package com.droute.userservice.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.droute.userservice.dto.request.CourierDetailsRequestDto;
 import com.droute.userservice.dto.response.CommonResponseDto;
 import com.droute.userservice.dto.response.CourierDetailResponseDto;
+import com.droute.userservice.dto.response.FilteredJourneyDetailsResponseDto;
 import com.droute.userservice.dto.response.ResponseBuilder;
 import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.feign.client.DriverServiceClient;
@@ -53,7 +56,7 @@ public class CourierController {
     
     //API to get jouney by courier
     @GetMapping("/{courierId}/journeys")
-    public ResponseEntity<?> getJourneysBasedOnCourier(@PathVariable Long courierId) {
+    public ResponseEntity<CommonResponseDto<List<FilteredJourneyDetailsResponseDto>>> getJourneysBasedOnCourier(@PathVariable Long courierId) {
         // Fetch courier details from DB
         var courierDetail = courierService.getCourierById(courierId);
 
@@ -79,6 +82,8 @@ public class CourierController {
         var data = courierService.getCourierById(courierId);
         return ResponseBuilder.success(HttpStatus.OK, "Courier details founded successfully", data);
     }
+
+   
 
     @GetMapping("/{courierId}/exists")
     public ResponseEntity<CommonResponseDto<Boolean>> courierExistsById(@PathVariable Long courierId) {

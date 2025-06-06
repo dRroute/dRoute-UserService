@@ -8,6 +8,7 @@ import com.droute.userservice.dto.request.CourierDetailsRequestDto;
 import com.droute.userservice.dto.response.CourierDetailResponseDto;
 import com.droute.userservice.entity.Courier;
 import com.droute.userservice.entity.UserEntity;
+import com.droute.userservice.enums.CourierStatus;
 import com.droute.userservice.enums.DimensionUnit;
 import com.droute.userservice.enums.WeightUnit;
 import com.droute.userservice.repository.CourierRepository;
@@ -112,6 +113,7 @@ public class CourierService {
                 .courierValue(courier.getCourierValue())
                 .createdAt(courier.getCreatedAt())
                 .updatedAt(courier.getUpdatedAt())
+                .status(courier.getStatus())
                 .build();
     }
 
@@ -144,6 +146,7 @@ public class CourierService {
         .courierWeight(request.getCourierWeight())
         .courierWeightUnit(WeightUnit.fromAbbreviation(request.getCourierWeightUnit()))
         .courierValue(request.getCourierValue())
+        .status(CourierStatus.SAVED)
         .build();
 }
 
@@ -153,4 +156,6 @@ public class CourierService {
                 .orElseThrow(() -> new EntityNotFoundException("Courier not found with id = " + courierId))
                 .getUser();
     }
+
+    
 }

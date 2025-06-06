@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.droute.userservice.dto.response.CommonResponseDto;
 import com.droute.userservice.dto.response.CourierDetailResponseDto;
-import com.droute.userservice.dto.response.JourneyDetailResponseDto;
+import com.droute.userservice.dto.response.FilteredJourneyDetailsResponseDto;
 
 @Component
 @FeignClient(name = "droute-cloud-gateway", path = "/api/driver")
 public interface DriverServiceClient {
 
     @PostMapping("/journey-details/filter")
-    public CommonResponseDto<List<JourneyDetailResponseDto>> getJourneysByCourierConditions(@RequestBody CourierDetailResponseDto courierDetail);
+    public CommonResponseDto<List<FilteredJourneyDetailsResponseDto>> getJourneysByCourierConditions(@RequestBody CourierDetailResponseDto courierDetail);
 
 }

@@ -1,5 +1,7 @@
 package com.droute.userservice.controller;
 
+import java.util.List;
+
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,15 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.droute.userservice.dto.request.RegisterUserRequestDto;
-import com.droute.userservice.dto.request.UpdatePasswordRequestDTO;
 import com.droute.userservice.dto.response.CommonResponseDto;
+import com.droute.userservice.dto.response.CourierDetailResponseDto;
 import com.droute.userservice.dto.response.ResponseBuilder;
 import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.service.UserEntityService;
 
 import io.swagger.v3.oas.annotations.Hidden;
-import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.persistence.EntityNotFoundException;
 
 
 @RestController
@@ -81,9 +82,17 @@ public class UserEntityController {
 		userEntityService.deleteUserById(userId);
 		return ResponseBuilder.success(HttpStatus.OK, "User Deleted Successfully...", null);
 
-
 	}
 
+	@GetMapping("/{userId}/couriers")
+    public ResponseEntity<CommonResponseDto<List<CourierDetailResponseDto>>> getCourierByUserId(@PathVariable Long userId) {
+        var data = userEntityService.getAllCourierByUserId(userId);
+        if (data == null || data.isEmpty()) {
+            throw new EntityNotFoundException("No courier found at the moment..");
+            
+        } 
+        return ResponseBuilder.success(HttpStatus.OK, "Courier details founded successfully", data);
+    }
 
 	
 
