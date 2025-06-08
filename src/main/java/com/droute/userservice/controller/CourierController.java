@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.droute.userservice.dto.request.CourierDetailsRequestDto;
@@ -22,7 +23,6 @@ import com.droute.userservice.dto.response.CommonResponseDto;
 import com.droute.userservice.dto.response.CourierDetailResponseDto;
 import com.droute.userservice.dto.response.FilteredJourneyDetailsResponseDto;
 import com.droute.userservice.dto.response.ResponseBuilder;
-import com.droute.userservice.entity.UserEntity;
 import com.droute.userservice.feign.client.DriverServiceClient;
 import com.droute.userservice.service.CourierService;
 
@@ -41,28 +41,15 @@ public class CourierController {
 
     private static final Logger logger = LoggerFactory.getLogger(CourierController.class);
 
-
-    //API to get user-details by courierId
-    @GetMapping("/{courierId}/user-details")
-    public ResponseEntity<CommonResponseDto<UserEntity>>  getUserDetailsByCourierId(@PathVariable Long courierId) {
-        // Fetch courier details from DB
-        var userDetails = courierService.getUserByCourierId(courierId);
-        if (userDetails == null) {
-            return ResponseBuilder.failure(HttpStatus.NOT_FOUND, "Courier not found", "USR_404_COURIER_NOT_FOUND");
-        }
-        return ResponseBuilder.success(HttpStatus.OK, "User details fetched", userDetails);
-    }
-
-    
-    //API to get jouney by courier
+    // API to get jouney by courier
     @GetMapping("/{courierId}/journeys")
-    public ResponseEntity<CommonResponseDto<List<FilteredJourneyDetailsResponseDto>>> getJourneysBasedOnCourier(@PathVariable Long courierId) {
+    public ResponseEntity<CommonResponseDto<List<FilteredJourneyDetailsResponseDto>>> getJourneysBasedOnCourier(
+            @PathVariable Long courierId) {
         // Fetch courier details from DB
         var courierDetail = courierService.getCourierById(courierId);
 
         // Call Driver Service via RestTemplate or WebClient
         var response = driverServiceClient.getJourneysByCourierConditions(courierDetail);
-        
 
         return ResponseBuilder.success(HttpStatus.OK, response.getMessage(), response.getData());
     }
@@ -80,23 +67,25 @@ public class CourierController {
     @GetMapping("/{courierId}")
     public ResponseEntity<CommonResponseDto<CourierDetailResponseDto>> getCourierById(@PathVariable Long courierId) {
         var data = courierService.getCourierById(courierId);
+        System.out.println("courier detail = " + data);
         return ResponseBuilder.success(HttpStatus.OK, "Courier details founded successfully", data);
     }
 
-   
-
     @GetMapping("/{courierId}/exists")
     public ResponseEntity<CommonResponseDto<Boolean>> courierExistsById(@PathVariable Long courierId) {
+        logger.info("checking existance of courierId {}", courierId);
         boolean exists = courierService.courierExistsById(courierId);
         return ResponseBuilder.success(HttpStatus.OK, "Courier existence checked successfully", exists);
     }
 
     @PutMapping("/{courierId}")
     public ResponseEntity<CommonResponseDto<CourierDetailResponseDto>> postCourier(
-            @Valid @RequestBody CourierDetailsRequestDto courierDetails, Long courierId) {
+            @RequestBody CourierDetailsRequestDto courierDetails, @PathVariable Long courierId) {
+
+                System.out.println("Update coueir called with id = "+ courierId);
         var data = courierService.updateCourier(courierId, courierDetails);
 
-        return ResponseBuilder.success(HttpStatus.CREATED, "Courier details added successfully", data);
+        return ResponseBuilder.success(HttpStatus.OK, "Courier details updated successfully", data);
     }
 
     @DeleteMapping("/{courierId}")
@@ -104,8 +93,5 @@ public class CourierController {
         courierService.deleteCourier(courierId);
         return ResponseBuilder.success(HttpStatus.OK, "Courier details founded successfully", null);
     }
-
-
-    
 
 }

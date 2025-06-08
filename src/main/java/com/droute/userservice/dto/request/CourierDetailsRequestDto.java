@@ -14,44 +14,47 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class CourierDetailsRequestDto {
-    @NotNull(message = "User ID is required")
+    // @NotNull(message = "User ID is required")
     private Long userId;
     
-    @NotBlank(message = "Source address is required")
-    @NotNull(message = "courierSourceAddress is required")
+    // @NotBlank(message = "Source address is required")
+    // @NotNull(message = "courierSourceAddress is required")
     private String courierSourceAddress;
     
-    @NotBlank(message = "Source coordinates are required")
-    @NotNull(message = "courierSourceCoordinate is required")
+    // @NotBlank(message = "Source coordinates are required")
+    // @NotNull(message = "courierSourceCoordinate is required")
     private String courierSourceCoordinate;
     
-    @NotBlank(message = "Destination address is required")
-    @NotNull(message = "courierDestinationAddress is required")
+    // @NotBlank(message = "Destination address is required")
+    // @NotNull(message = "courierDestinationAddress is required")
     private String courierDestinationAddress;
     
-    @NotBlank(message = "Destination coordinates are required")
+    // @NotBlank(message = "Destination coordinates are required")
     private String courierDestinationCoordinate;
     
-    @Positive(message = "Height must be positive")
+    // @Positive(message = "Height must be positive")
     private Double courierHeight;
     
-    @Positive(message = "Width must be positive")
+    // @Positive(message = "Width must be positive")
     private Double courierWidth;
     
-    @Positive(message = "Length must be positive")
+    // @Positive(message = "Length must be positive")
     private Double courierLength;
     
-    @NotNull(message = "Dimension unit is required")
+    // @NotNull(message = "Dimension unit is required")
     private String courierDimensionUnit;
     
-    @Positive(message = "Weight must be positive")
+    // @Positive(message = "Weight must be positive")
     private Double courierWeight;
     
-    @NotNull(message = "Weight unit is required")
+    // @NotNull(message = "Weight unit is required")
     private String courierWeightUnit;
     
-    @PositiveOrZero(message = "Value must be positive or zero")
+    // @PositiveOrZero(message = "Value must be positive or zero")
     private Double courierValue;
+
+    // @NotNull(message = "status is required")
+    private String status;
 
     
 }

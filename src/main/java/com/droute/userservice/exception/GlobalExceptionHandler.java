@@ -9,19 +9,18 @@ import javax.mail.SendFailedException;
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.droute.userservice.DrouteUserServiceApplication;
 import com.droute.userservice.dto.response.CommonResponseDto;
 import com.droute.userservice.dto.response.ResponseBuilder;
 import com.droute.userservice.entity.UserEntity;
+import com.sun.mail.smtp.SMTPAddressFailedException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -49,6 +48,16 @@ public class GlobalExceptionHandler {
 		return ResponseBuilder.failure(HttpStatus.CONFLICT, exception.getMessage(), "USR_409_CONFLICT");
 	}
 
+	@ExceptionHandler(DriverServiceException.class)
+	public ResponseEntity<CommonResponseDto<UserEntity>> handleDriverServiceException(
+			DriverServiceException exception) {
+
+		logger.error(exception.getMessage());
+
+		return ResponseBuilder.failure(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(),
+				"DRI_500_INTERNAL_SERVER_ERROR");
+	}
+
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<CommonResponseDto<UserEntity>> handleIllegalArgumentException(
 			IllegalArgumentException exception) {
@@ -69,6 +78,27 @@ public class GlobalExceptionHandler {
 
 	}
 
+	@ExceptionHandler(SendFailedException.class)
+	public ResponseEntity<CommonResponseDto<Object>> handleSendFailedException(
+			SendFailedException exception) {
+
+		logger.error(exception.getMessage());
+
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, exception.getMessage(), "USR_400_EMAIL_SEND_FAILED");
+
+	}
+
+	@ExceptionHandler(SMTPAddressFailedException.class)
+	public ResponseEntity<CommonResponseDto<Object>> handleSMTPAddressFailedException(
+			BadRequestException exception) {
+
+		logger.error(exception.getMessage());
+
+		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, exception.getMessage(),
+				"USR_400_EMAIL_SMTP_ADDRESS_FAILED");
+
+	}
+
 	@ExceptionHandler(SQLIntegrityConstraintViolationException.class)
 	public ResponseEntity<CommonResponseDto<UserEntity>> handleSQLIntegrityConstraintViolationException(
 			SQLIntegrityConstraintViolationException exception) {
@@ -80,15 +110,16 @@ public class GlobalExceptionHandler {
 	}
 
 	// @Override
-	// protected ResponseEntity handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+	// protected ResponseEntity
+	// handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 
-	// 	Map<String, String> errors = new HashMap<>();
-	// 	ex.getBindingResult().getFieldErrors()
-	// 			.forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+	// Map<String, String> errors = new HashMap<>();
+	// ex.getBindingResult().getFieldErrors()
+	// .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
-	// 	return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Validation failed", errors);
+	// return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, "Validation failed",
+	// errors);
 	// }
-
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -97,17 +128,22 @@ public class GlobalExceptionHandler {
 				.forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
-	@ExceptionHandler(SendFailedException.class)
-	public ResponseEntity<?> handleValidationErrors(SendFailedException exception) {
-		logger.error(exception.getMessage());
 
-		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, exception.getMessage(), "USR_400_BAD_REQUEST");
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<?> handleException(Exception ex) {
+
+		logger.error(ex.getMessage());
+		return ResponseBuilder.failure(HttpStatus.CONFLICT, ex.getMessage(), "USR_409_CONFLICT");
 	}
-	@ExceptionHandler(com.sun.mail.smtp.SMTPAddressFailedException.class)
-	public ResponseEntity<?> handleValidationErrors(com.sun.mail.smtp.SMTPAddressFailedException exception) {
-		logger.error(exception.getMessage());
 
-		return ResponseBuilder.failure(HttpStatus.BAD_REQUEST, exception.getMessage(), "USR_400_BAD_REQUEST");
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<CommonResponseDto<Object>> handleHttpMessageNotReadableException(
+			HttpMessageNotReadableException ex) {
+		logger.error("JSON parse error: {}", ex.getMessage());
+		return ResponseBuilder.failure(
+				HttpStatus.BAD_REQUEST,
+				"Invalid request format: " + ex.getMostSpecificCause().getMessage(),
+				"USR_400_INVALID_FORMAT");
 	}
 
 }

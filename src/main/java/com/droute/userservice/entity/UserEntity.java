@@ -8,6 +8,7 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.droute.userservice.enums.ProfileStatus;
 import com.droute.userservice.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -35,7 +36,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = { "couriers" })
+@ToString(exclude = {"couriers"})
 public class UserEntity {
 
 	@Id
@@ -54,6 +55,9 @@ public class UserEntity {
 	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
 	@Column(name = "role")
 	private Set<Role> roles;
+
+	@Enumerated(EnumType.STRING)
+	private ProfileStatus status;
 
 	@Column(unique = true)
 	private String contactNo;

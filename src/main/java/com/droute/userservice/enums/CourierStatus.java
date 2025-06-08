@@ -1,11 +1,17 @@
 package com.droute.userservice.enums;
 
 public enum CourierStatus {
+    PENDING,
+    ACCEPTED,
+    IN_PROGRESS,
+    COMPLETED,
+    CANCELLED,
+    DELAYED,
+    //Courier status
     SAVED,
     REQUESTED,
-    ACCEPTED,
+    REJECTED,
     PICKED_UP,
-    DELIVERED,
-    CANCELLED,
-    DELETED
+    DELIVERED;
+    
 }

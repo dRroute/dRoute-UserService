@@ -21,9 +21,11 @@ import com.droute.userservice.dto.request.ResetPasswordRequestDTO;
 import com.droute.userservice.dto.response.CourierDetailResponseDto;
 import com.droute.userservice.entity.Courier;
 import com.droute.userservice.entity.UserEntity;
+import com.droute.userservice.enums.ProfileStatus;
 import com.droute.userservice.enums.Role;
 import com.droute.userservice.exception.EntityAlreadyExistsException;
 import com.droute.userservice.repository.UserEntityRepository;
+import com.droute.userservice.utils.Utils;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -60,6 +62,7 @@ public class UserEntityService {
 			user.setFullName(userDetails.getFullName());
 			user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 			user.setColorHexValue(getRandomColor());
+			user.setStatus(ProfileStatus.PENDING_COMPLETION);
 			return userEntityRepository.save(user);
 		}
 
@@ -72,6 +75,7 @@ public class UserEntityService {
 		user.setFullName(userDetails.getFullName());
 		user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 		user.setRoles(roles);
+		user.setStatus(ProfileStatus.PENDING_COMPLETION);
 		user.setColorHexValue(getRandomColor());
 
 		return userEntityRepository.save(user);
@@ -86,20 +90,20 @@ public class UserEntityService {
 			logger.error("Role should be user");
 			throw new BadRequestException("Role should be user");
 		}
-		var user = userEntityRepository.findByEmail(userDetails.getEmail()).orElseThrow(
-				() -> new EntityNotFoundException("User not found with email = " + userDetails.getEmail()));
+		var user = userEntityRepository.getByEmailOrContactNo(userDetails.getEmail(), userDetails.getContactNo());
 
-		// If user already exist with driver role then throw exception
+		// If user already exist with user role then throw exception
 		if (user != null && user.getRoles().contains(Role.USER)) {
-			throw new EntityAlreadyExistsException("User already exist with email = " + userDetails.getEmail());
+			throw new EntityAlreadyExistsException("User already exist with either email = " + userDetails.getEmail()+ " or phone = "+ userDetails.getContactNo());
 		}
 
-		// If user already exist with user role then add new role as driver
+		// If user already exist with driver role then add new role as user
 		else if (user != null && user.getRoles().contains(Role.DRIVER)) {
 			user.getRoles().add(Role.USER);
 			user.setContactNo(userDetails.getContactNo());
 			user.setEmail(userDetails.getEmail());
 			user.setFullName(userDetails.getFullName());
+			user.setStatus(ProfileStatus.ACTIVE);
 			user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 			user.setColorHexValue(getRandomColor());
 			return userEntityRepository.save(user);
@@ -114,6 +118,7 @@ public class UserEntityService {
 		user.setFullName(userDetails.getFullName());
 		user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 		user.setRoles(roles);
+		user.setStatus(ProfileStatus.ACTIVE);
 		user.setColorHexValue(getRandomColor());
 
 		return userEntityRepository.save(user);
@@ -140,10 +145,18 @@ public class UserEntityService {
 
 	}
 
-	public UserEntity updateUser(UserEntity user) {
+	public UserEntity updateUser(UserEntity user, Long userId) {
 
-		return userEntityRepository.save(user);
+		var existingUser = findUserById(userId);
 
+		existingUser.setFullName(Utils.getUpdatedValue(user.getFullName(), existingUser.getFullName()));
+		existingUser.setEmail(Utils.getUpdatedValue(user.getEmail(), existingUser.getEmail()));
+		existingUser.setPassword(Utils.getUpdatedValue(user.getPassword(), existingUser.getPassword()));
+		existingUser.setRoles(Utils.getUpdatedValue(user.getRoles(), existingUser.getRoles()));
+		existingUser.setStatus(Utils.getUpdatedValue(user.getStatus(), existingUser.getStatus()));
+		existingUser.setContactNo(Utils.getUpdatedValue(user.getContactNo(), existingUser.getContactNo()));
+		existingUser.setColorHexValue(Utils.getUpdatedValue(user.getColorHexValue(), existingUser.getColorHexValue()));
+		return userEntityRepository.save(existingUser);
 	}
 
 	public void deleteUserById(Long userId) {
@@ -171,8 +184,7 @@ public class UserEntityService {
 
 				&& userByEmailOrPhone.getRoles().contains(Role.valueOf(loginDetails.getRole().toUpperCase()))) {
 			return userByEmailOrPhone;
-		}
-		else if (userByEmailOrPhone != null && !passwordEncoder.matches(loginDetails.getPassword(),
+		} else if (userByEmailOrPhone != null && !passwordEncoder.matches(loginDetails.getPassword(),
 				userByEmailOrPhone.getPassword())) {
 			throw new BadRequestException("Wrong password entered.");
 		} else if (userByEmailOrPhone != null
@@ -192,7 +204,7 @@ public class UserEntityService {
 	}
 
 	@Transactional
-    public List<CourierDetailResponseDto> getAllCourierByUserId(Long userId) {
+	public List<CourierDetailResponseDto> getAllCourierByUserId(Long userId) {
 
 		var couriers = findUserById(userId).getCouriers();
 
@@ -202,30 +214,32 @@ public class UserEntityService {
 
 		for (Courier courier : couriers) {
 			var dto = CourierDetailResponseDto.builder()
-						.courierId(courier.getCourierId())
-						.courierDestinationAddress(courier.getCourierDestinationAddress())
-						.courierDestinationCoordinate(courier.getCourierDestinationCoordinate())
-						.courierDimensionUnit(courier.getCourierDimensionUnit())
-						.courierHeight(courier.getCourierHeight())
-						.courierLength(courier.getCourierLength())
-						.courierWidth(courier.getCourierWidth())
-						.courierSourceAddress(courier.getCourierSourceAddress())
-						.courierSourceCoordinate(courier.getCourierSourceCoordinate())
-						.courierValue(courier.getCourierValue())
-						.courierWeight(courier.getCourierWeight())
-						.courierWeightUnit(courier.getCourierWeightUnit())
-						.userId(courier.getUser().getUserId())
-						.createdAt(courier.getCreatedAt())
-						.updatedAt(courier.getUpdatedAt())
-						.build();
-				data.add(dto);
+					.courierId(courier.getCourierId())
+					.courierDestinationAddress(courier.getCourierDestinationAddress())
+					.courierDestinationCoordinate(courier.getCourierDestinationCoordinate())
+					.courierDimensionUnit(courier.getCourierDimensionUnit())
+					.courierHeight(courier.getCourierHeight())
+					.courierLength(courier.getCourierLength())
+					.courierWidth(courier.getCourierWidth())
+					.courierSourceAddress(courier.getCourierSourceAddress())
+					.courierSourceCoordinate(courier.getCourierSourceCoordinate())
+					.courierValue(courier.getCourierValue())
+					.courierWeight(courier.getCourierWeight())
+					.courierWeightUnit(courier.getCourierWeightUnit())
+					.userId(courier.getUser().getUserId())
+					.status(courier.getStatus())
+					.createdAt(courier.getCreatedAt())
+					.updatedAt(courier.getUpdatedAt())
+					.build();
+			data.add(dto);
 		}
 
-		
-					
-
 		return data;
-       
+
+	}
+
+	public List<UserEntity> getAllUser() {
+		return userEntityRepository.findAll();
 	}
 
 }
