@@ -34,3 +34,4 @@ build/
 
 # Ignore environment file
 .env
+cred.json
