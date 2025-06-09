@@ -27,7 +27,7 @@ import com.droute.userservice.service.UserEntityService;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/api/user/auth")
+@RequestMapping("/api/user/auth")   //api/user/auth/login
 @CrossOrigin("*")
 public class AuthController {
 
