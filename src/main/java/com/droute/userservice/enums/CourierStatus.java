@@ -14,4 +14,5 @@ public enum CourierStatus {
     PICKED_UP,
     DELIVERED;
     
+    
 }
